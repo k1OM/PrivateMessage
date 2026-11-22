@@ -5,14 +5,15 @@
 #include "Protocol.hpp"
 
 #include <asio.hpp>
-
+#include <cstdint>
 #include <chrono>
 #include <exception>
 #include <iostream>
 #include <memory>
 #include <string>
+#include <stdexcept>
 
-int main()
+int main(int argc, char* argv[])
 {
     constexpr std::size_t TARGET_PINGS = 4;
 
@@ -151,11 +152,50 @@ int main()
         }
     );
 
+    std::uint16_t port = Protocol::DEFAULT_PORT;
+
+    try
+    {
+        if (argc > 2)
+        {
+            throw std::invalid_argument(
+                "Usage : test_async_heartbeat [port]"
+            );
+        }
+
+        if (argc == 2)
+        {
+            std::string argument = argv[1];
+            std::size_t position = 0;
+
+            unsigned long value = std::stoul(
+                argument,
+                &position
+            );
+
+            if (position != argument.size() ||
+                value == 0 ||
+                value > 65535)
+            {
+                throw std::invalid_argument(
+                    "Port invalide"
+                );
+            }
+
+            port = static_cast<std::uint16_t>(value);
+        }
+    }
+    catch (const std::exception& error)
+    {
+        std::cerr << "Erreur : " << error.what() << std::endl;
+        return 1;
+    }
+
     try
     {
         client->connect(
             "127.0.0.1",
-            Protocol::DEFAULT_PORT
+            port
         );
 
         context.run();
@@ -163,7 +203,7 @@ int main()
     catch (const std::exception& error)
     {
         std::cerr
-            << "Exception : "
+            << "Exception reseau : "
             << error.what()
             << std::endl;
 

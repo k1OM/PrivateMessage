@@ -369,6 +369,42 @@ if(BUILD_TESTING)
                 privatechat_network
         )
 
+        # ----------------------------------------------
+        # Integration : timeout PONG automatise
+        # ----------------------------------------------
+
+        find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
+        add_test(
+            NAME PongTimeoutIntegration
+            COMMAND
+                ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/integration/run_pong_timeout.py
+                ${CMAKE_CURRENT_BINARY_DIR}
+        )
+
+        set_tests_properties(PongTimeoutIntegration PROPERTIES
+            TIMEOUT 30
+            RUN_SERIAL TRUE
+        )
+
+        # ----------------------------------------------
+        # Integration : heartbeat asynchrone automatise
+        # ----------------------------------------------
+
+        add_test(
+            NAME AsyncHeartbeatIntegration
+            COMMAND
+                ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/integration/run_async_heartbeat.py
+                ${CMAKE_CURRENT_BINARY_DIR}
+        )
+
+        set_tests_properties(AsyncHeartbeatIntegration PROPERTIES
+            TIMEOUT 45
+            RUN_SERIAL TRUE
+        )
+
     endif()
 
     # ----------------------------------------------
