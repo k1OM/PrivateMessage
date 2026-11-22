@@ -1,0 +1,16 @@
+# Compilation
+/build*/
+/cmake-build*/
+
+# Fichiers temporaires
+*.o
+*.a
+*.so
+*.swp
+*~
+
+# Paramètres locaux et secrets
+.env
+.env.*
+config/client.json
+config/server.json

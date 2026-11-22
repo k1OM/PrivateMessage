@@ -1,0 +1,49 @@
+
+FROM docker.io/library/ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        cmake \
+        git \
+        pkg-config \
+        libasio-dev \
+        libgtk-3-dev \
+        libwebkit2gtk-4.1-dev \
+        libgstreamer1.0-dev \
+        libgstreamer-plugins-base1.0-dev \
+        libcurl4-openssl-dev \
+        libnotify-dev \
+        libgl1-mesa-dev \
+        libglu1-mesa-dev \
+        libssl-dev \
+        ca-certificates \
+        python3 && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+
+
+
+
+ARG WX_VERSION=3.3.4
+
+RUN git clone --branch v${WX_VERSION} --depth 1 \
+        https://github.com/wxWidgets/wxWidgets.git /opt/wxWidgets && \
+    cd /opt/wxWidgets && \
+    git submodule update --init --recursive && \
+    mkdir build-gtk3 && \
+    cd build-gtk3 && \
+    ../configure \
+        --prefix=/usr/local \
+        --with-gtk=3 \
+        --enable-monolithic \
+        --disable-shared \
+        --with-opengl \
+        --enable-webview && \
+    make -j4 && \
+    make install && \
+    ldconfig
+

@@ -1,0 +1,31 @@
+PrivateChat/
+├── CMakeLists.txt
+├── client/
+│   ├── main.cpp
+│   ├── Application.hpp
+│   ├── Application.cpp
+│   ├── MainFrame.hpp
+│   ├── MainFrame.cpp
+│   ├── NetworkClient.hpp
+│   └── NetworkClient.cpp
+│
+├── server/
+│   ├── main.cpp
+│   ├── ChatServer.hpp
+│   ├── ChatServer.cpp
+│   ├── ClientSession.hpp
+│   └── ClientSession.cpp
+│
+├── shared/
+│   ├── Message.hpp
+│   └── Message.cpp
+│
+└── tests/
+
+
+#build : 
+cmake -S . -B build_v13 -DCMAKE_BUILD_TYPE=Debug
+
+              cmake --build build_v13 \
+                      --target privatechat-server \
+                      -j(nproc)
