@@ -1,0 +1,42 @@
+
+# Étape 1 : compilation de PrivateMessage
+FROM docker.io/library/ubuntu:24.04 AS builder
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        cmake \
+        libasio-dev \
+        ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+
+COPY . .
+
+RUN cmake -S . -B /build \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DPRIVATECHAT_BUILD_CLIENT=OFF && \
+    cmake --build /build \
+        --target privatechat-server -j2
+
+
+# Étape 2 : environnement d'exécution
+FROM docker.io/library/ubuntu:24.04
+
+RUN groupadd --system privatechat && \
+    useradd --system \
+        --gid privatechat \
+        --no-create-home privatechat
+
+COPY --from=builder \
+    /build/privatechat-server \
+    /usr/local/bin/privatechat-server
+
+USER privatechat
+
+EXPOSE 5555/tcp
+
+CMD ["/usr/local/bin/privatechat-server"]

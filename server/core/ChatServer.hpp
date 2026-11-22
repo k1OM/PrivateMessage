@@ -7,11 +7,14 @@
 #include <asio.hpp>
 #include <cstdint>
 #include <memory>
+#include <csignal>
 
 class ChatServer
 {
 private:
     asio::io_context ioContext;
+
+    asio::signal_set signals;
 
     asio::ip::tcp::acceptor acceptor;
 

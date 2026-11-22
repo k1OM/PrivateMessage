@@ -16,6 +16,7 @@
 
 ChatServer::ChatServer(std::uint16_t port)
     : ioContext(),
+      signals(ioContext, SIGINT, SIGTERM),
       acceptor(
           ioContext,
           asio::ip::tcp::endpoint(
@@ -40,6 +41,25 @@ void ChatServer::start()
               << endpoint.port()
               << std::endl;
 
+    signals.async_wait(
+        [this](const asio::error_code& error, int signalNumber)
+        {
+            if (error)
+            {
+                return;
+            }
+
+            std::cout
+                << "Signal recu : "
+                << signalNumber
+                << std::endl;
+
+            std::cout << "Arret du serveur demande" << std::endl;
+
+            stop();
+        }
+    );
+
     acceptConnection();
 
     ioContext.run();
@@ -51,8 +71,6 @@ void ChatServer::stop()
     acceptor.close(error);
     ioContext.stop();
 }
-
-
 
 void ChatServer::acceptConnection()
 {

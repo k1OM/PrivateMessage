@@ -8,16 +8,33 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # ==================================================
-# Dependances
+# Options de compilation
 # ==================================================
 
-find_package(wxWidgets REQUIRED COMPONENTS core base)
+option(PRIVATECHAT_BUILD_CLIENT
+       "Compiler les clients graphiques"
+       ON)
+
+
+# ==================================================
+# Dependances communes
+# ==================================================
+
 find_path(ASIO_INCLUDE_DIR asio.hpp REQUIRED)
 find_package(Threads REQUIRED)
 
-include(${wxWidgets_USE_FILE})
-
 include(CTest)
+
+# ==================================================
+# Dependances graphiques
+# ==================================================
+
+if(PRIVATECHAT_BUILD_CLIENT)
+
+    find_package(wxWidgets REQUIRED COMPONENTS core base)
+    include(${wxWidgets_USE_FILE})
+
+endif()
 
 
 # ==================================================
@@ -39,6 +56,8 @@ target_include_directories(privatechat_shared
 # ==================================================
 # Bibliotheque Client
 # ==================================================
+
+if(PRIVATECHAT_BUILD_CLIENT)
 
 add_executable(privatechat-client
     client/main.cpp
@@ -84,6 +103,8 @@ target_link_libraries(privatechat-client
         privatechat_network
         ${wxWidgets_LIBRARIES}
 )
+
+
 
 # ==================================================
 # Bibliotheque Client 2
@@ -146,6 +167,7 @@ target_compile_definitions(privatechat-client-2 PRIVATE
 )
 
 
+
 # ==================================================
 # Bibliotheque reseau du client
 # ==================================================
@@ -172,6 +194,8 @@ target_link_libraries(privatechat_network
         privatechat_shared
         Threads::Threads
 )
+
+endif() # PRIVATECHAT_BUILD_CLIENT
 
 # ==================================================
 # Serveur de messagerie

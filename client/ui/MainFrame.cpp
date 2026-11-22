@@ -1,4 +1,5 @@
 #include "MainFrame.hpp"
+#include "ClientConfig.hpp"
 
 MainFrame::MainFrame()
     : wxFrame(
@@ -26,7 +27,7 @@ MainFrame::MainFrame()
         new wxStaticText(
             panel,
             wxID_ANY,
-            "PrivateChat - Version 1.3"
+            "PrivateChat - Version 1.4"
         );
 
     wxFont titleFont = title->GetFont();
@@ -150,7 +151,12 @@ MainFrame::MainFrame()
     UpdateButtons();
 
     AppendLog("Application demarree");
-    AppendLog("Serveur : 127.0.0.1:5555");
+    AppendLog(
+        "Serveur : " +
+        wxString::FromUTF8(ClientConfig::SERVER_IP) +
+        ":" +
+        wxString::Format("%u", ClientConfig::SERVER_PORT)
+    );
 
     // Interroger le controleur toutes les 100 ms
 
