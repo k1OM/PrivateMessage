@@ -224,10 +224,10 @@ add_executable(privatechat-server
 
 target_include_directories(privatechat-server
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/server/core
+        ${CMAKE_CURRENT_SOURCE_DIR}/server/core/headers
         ${CMAKE_CURRENT_SOURCE_DIR}/server/headers
-        ${CMAKE_CURRENT_SOURCE_DIR}/server/session
-        ${CMAKE_CURRENT_SOURCE_DIR}/server/protocol
+        ${CMAKE_CURRENT_SOURCE_DIR}/server/session/headers
+        ${CMAKE_CURRENT_SOURCE_DIR}/server/protocol/headers
         ${ASIO_INCLUDE_DIR}
 )
 
@@ -338,30 +338,38 @@ if(BUILD_TESTING)
 
 
     # ----------------------------------------------
-    # Integration : cycle PING / PONG
+    # Tests d'intégration du réseau client
     # ----------------------------------------------
 
-    add_executable(test_async_heartbeat
-        tests/test_async_heartbeat.cpp
-    )
+    if(PRIVATECHAT_BUILD_CLIENT)
 
-    target_link_libraries(test_async_heartbeat
-        PRIVATE
-            privatechat_network
-    )
+        # ----------------------------------------------
+        # Integration : cycle PING / PONG
+        # ----------------------------------------------
 
-    # ----------------------------------------------
-    # Integration : timeout PONG
-    # ----------------------------------------------
+        add_executable(test_async_heartbeat
+            tests/test_async_heartbeat.cpp
+        )
 
-    add_executable(test_pong_timeout
-        tests/test_pong_timeout.cpp
-    )
+        target_link_libraries(test_async_heartbeat
+            PRIVATE
+                privatechat_network
+        )
 
-    target_link_libraries(test_pong_timeout
-        PRIVATE
-            privatechat_network
-    )
+        # ----------------------------------------------
+        # Integration : timeout PONG
+        # ----------------------------------------------
+
+        add_executable(test_pong_timeout
+            tests/test_pong_timeout.cpp
+        )
+
+        target_link_libraries(test_pong_timeout
+            PRIVATE
+                privatechat_network
+        )
+
+    endif()
 
     # ----------------------------------------------
     # Serveur silencieux pour les tests
@@ -394,7 +402,7 @@ if(BUILD_TESTING)
 
     target_include_directories(test_session_inactivity_monitor
         PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/server/session
+            ${CMAKE_CURRENT_SOURCE_DIR}/server/session/headers
             ${ASIO_INCLUDE_DIR}
     )
 
@@ -438,8 +446,8 @@ if(BUILD_TESTING)
     target_include_directories(test_session_message_handler
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/server/headers
-            ${CMAKE_CURRENT_SOURCE_DIR}/server/session
-            ${CMAKE_CURRENT_SOURCE_DIR}/server/protocol
+            ${CMAKE_CURRENT_SOURCE_DIR}/server/session/headers
+            ${CMAKE_CURRENT_SOURCE_DIR}/server/protocol/headers
     )
 
     target_link_libraries(test_session_message_handler
