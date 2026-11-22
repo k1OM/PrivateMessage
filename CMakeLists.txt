@@ -49,8 +49,8 @@ add_library(privatechat_shared STATIC
 
 target_include_directories(privatechat_shared
     PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/shared/protocol
-        ${CMAKE_CURRENT_SOURCE_DIR}/shared/codec
+        ${CMAKE_CURRENT_SOURCE_DIR}/shared/protocol/headers
+        ${CMAKE_CURRENT_SOURCE_DIR}/shared/codec/headers
 )
 
 # ==================================================
