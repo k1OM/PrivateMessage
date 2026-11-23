@@ -412,7 +412,7 @@ if(BUILD_TESTING)
         # ----------------------------------------------
 
         add_executable(test_async_heartbeat
-            tests/test_async_heartbeat.cpp
+            tests/integration/client/test_async_heartbeat.cpp
         )
 
         target_link_libraries(test_async_heartbeat
@@ -425,7 +425,7 @@ if(BUILD_TESTING)
         # ----------------------------------------------
 
         add_executable(test_pong_timeout
-            tests/test_pong_timeout.cpp
+            tests/integration/client/test_pong_timeout.cpp
         )
 
         target_link_libraries(test_pong_timeout
@@ -476,7 +476,7 @@ if(BUILD_TESTING)
     # ----------------------------------------------
 
     add_executable(test_silent_server
-        tests/test_silent_server.cpp
+        tests/integration/helpers/test_silent_server.cpp
     )
 
     target_include_directories(test_silent_server
@@ -526,7 +526,7 @@ if(BUILD_TESTING)
     # ----------------------------------------------
 
     add_executable(test_inactive_client
-        tests/test_inactive_client.cpp
+        tests/integration/server/test_inactive_client.cpp
     )
 
     target_link_libraries(test_inactive_client
@@ -565,7 +565,7 @@ if(BUILD_TESTING)
     # ----------------------------------------------
 
     add_executable(test_tcp_protocol
-        tests/test_tcp_protocol.cpp
+        tests/integration/server/test_tcp_protocol.cpp
     )
 
     target_link_libraries(test_tcp_protocol
