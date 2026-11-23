@@ -469,6 +469,50 @@ if(BUILD_TESTING)
             RUN_SERIAL TRUE
         )
 
+
+        # ----------------------------------------------
+        # MultiClient integration test
+        # ----------------------------------------------
+
+        add_executable(test_multiple_clients
+            tests/integration/server/test_multiple_clients.cpp
+            tests/integration/helpers/MultiClientTest.cpp
+
+            client/NetworkClient.cpp
+        )
+
+        target_include_directories(test_multiple_clients
+            PRIVATE
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/integration/helpers/headers
+                ${CMAKE_CURRENT_SOURCE_DIR}/client/headers
+        )
+
+        target_link_libraries(test_multiple_clients
+            PRIVATE
+                privatechat_shared
+                privatechat_network
+        )
+
+        # ----------------------------------------------
+        # MultiClient integration python
+        # ----------------------------------------------
+
+
+        add_test(
+            NAME MultipleClientsIntegration
+            COMMAND
+                ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/integration/run_multiple_clients.py
+                $<TARGET_FILE:privatechat-server>
+                $<TARGET_FILE:test_multiple_clients>
+        )
+
+        set_tests_properties(MultipleClientsIntegration
+            PROPERTIES
+                TIMEOUT 35
+                RUN_SERIAL TRUE
+        )
+
     endif()
 
     # ----------------------------------------------
@@ -573,6 +617,8 @@ if(BUILD_TESTING)
             privatechat_shared
             Threads::Threads
     )
+
+    
 
 
 endif()

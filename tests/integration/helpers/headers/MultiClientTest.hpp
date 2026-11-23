@@ -6,15 +6,19 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <mutex>
+#include <unordered_set>
 
 class MultiClientTest
 {
 private:
+    std::mutex sessionMutex;
     std::string serverAddress;
-    std::uint16_t serverPort;
 
+    std::uint16_t serverPort;
     std::size_t clientCount;
 
+    std::unordered_set<std::uint64_t> sessionIds;
     std::atomic<std::size_t> successfulClients;
     std::atomic<std::size_t> failedClients;
 
