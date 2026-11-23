@@ -513,6 +513,47 @@ if(BUILD_TESTING)
                 RUN_SERIAL TRUE
         )
 
+        # ----------------------------------------------
+        # MultiClient session deconnection
+        # ----------------------------------------------
+
+
+        add_executable(test_session_disconnect
+            tests/integration/server/test_session_disconnect.cpp
+            client/NetworkClient.cpp
+        )
+
+        target_include_directories(test_session_disconnect
+            PRIVATE
+                ${CMAKE_CURRENT_SOURCE_DIR}/client/headers
+        )
+
+        target_link_libraries(test_session_disconnect
+            PRIVATE
+                privatechat_shared
+                privatechat_network
+        )
+
+
+        # ----------------------------------------------
+        # Session disconnect integration test python
+        # ----------------------------------------------
+
+        add_test(
+            NAME SessionDisconnectIntegration
+            COMMAND
+                ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/integration/run_session_disconnect.py
+                $<TARGET_FILE:privatechat-server>
+                $<TARGET_FILE:test_session_disconnect>
+        )
+
+        set_tests_properties(SessionDisconnectIntegration
+            PROPERTIES
+                TIMEOUT 35
+                RUN_SERIAL TRUE
+        )
+
     endif()
 
     # ----------------------------------------------
