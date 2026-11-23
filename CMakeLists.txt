@@ -198,44 +198,54 @@ target_link_libraries(privatechat_network
 endif() # PRIVATECHAT_BUILD_CLIENT
 
 # ==================================================
-# Serveur de messagerie
+# Bibliotheque des composants serveur
 # ==================================================
 
-add_executable(privatechat-server
-    server/main.cpp
-
-    # Gestion du core
-    server/core/ChatServer.cpp
-
-    # Gestion des protocoles
+add_library(privatechat_server_core STATIC
     server/protocol/SessionMessageHandler.cpp
 
-    # Gestion des sessions
     server/session/ClientSession.cpp
     server/session/SessionManager.cpp
     server/session/SessionInactivityMonitor.cpp
 
-    #Gestionaire de reseau
     server/network/ClientSessionReader.cpp
     server/network/ClientSessionWriter.cpp
     server/network/ClientSessionConnection.cpp
-
 )
 
-target_include_directories(privatechat-server
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/server/core/headers
-        ${CMAKE_CURRENT_SOURCE_DIR}/server/headers
+target_include_directories(privatechat_server_core
+    PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/server/session/headers
         ${CMAKE_CURRENT_SOURCE_DIR}/server/protocol/headers
         ${ASIO_INCLUDE_DIR}
 )
 
-target_link_libraries(privatechat-server
-    PRIVATE
+target_link_libraries(privatechat_server_core
+    PUBLIC
         privatechat_shared
         Threads::Threads
 )
+
+# ==================================================
+# Serveur de messagerie
+# ==================================================
+
+
+add_executable(privatechat-server
+    server/main.cpp
+    server/core/ChatServer.cpp
+)
+
+target_include_directories(privatechat-server
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/server/core/headers
+)
+
+target_link_libraries(privatechat-server
+    PRIVATE
+        privatechat_server_core
+)
+
 
 # ==================================================
 # Tests unitaires
@@ -659,6 +669,32 @@ if(BUILD_TESTING)
             Threads::Threads
     )
 
+
+    # ----------------------------------------------
+    # SessionManager Unit Test
+    # ----------------------------------------------
+
+
+    add_executable(test_session_manager
+        tests/unit/test_session_manager.cpp
+    )
+
+    target_link_libraries(test_session_manager
+        PRIVATE
+            privatechat_server_core
+    )
+
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(test_session_manager
+            PRIVATE
+                -UNDEBUG
+        )
+    endif()
+
+    add_test(
+        NAME SessionManager
+        COMMAND test_session_manager
+    )
 
 
 
