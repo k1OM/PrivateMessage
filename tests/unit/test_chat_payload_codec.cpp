@@ -2,6 +2,7 @@
 #include "ChatPayloadCodec.hpp"
 
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <stdexcept>
@@ -9,11 +10,12 @@
 
 int main()
 {
-    // Test 1 : Alice souhaite ecrire a Bob (session 2).
+    // Test 1 : PrivateRequest.
 
     ChatPayload request{
         ChatPayloadKind::PrivateRequest,
         2,
+        1001,
         "Salut Bob !"
     };
 
@@ -25,18 +27,19 @@ int main()
 
     assert(decoded.kind == ChatPayloadKind::PrivateRequest);
     assert(decoded.sessionId == 2);
+    assert(decoded.messageId == 1001);
     assert(decoded.text == "Salut Bob !");
 
     std::cout
         << "[OK] Encodage et decodage PrivateRequest"
         << std::endl;
 
-    // Test 2 : le serveur indique que l'expediteur
-    // est Alice, session 1.
+    // Test 2 : PrivateDelivery.
 
     ChatPayload delivery{
         ChatPayloadKind::PrivateDelivery,
         1,
+        1001,
         "Salut Bob !"
     };
 
@@ -45,29 +48,41 @@ int main()
 
     assert(decoded.kind == ChatPayloadKind::PrivateDelivery);
     assert(decoded.sessionId == 1);
+    assert(decoded.messageId == 1001);
     assert(decoded.text == "Salut Bob !");
 
     std::cout
         << "[OK] Encodage et decodage PrivateDelivery"
         << std::endl;
 
-    // Test 3 : identifiant big-endian.
+    // Test 3 : encodage big-endian des identifiants.
 
     ChatPayload bigId{
         ChatPayloadKind::PrivateRequest,
         0x0102030405060708ULL,
+        0x1112131415161718ULL,
         "Test"
     };
 
     encoded = ChatPayloadCodec::encode(bigId);
 
+    assert(encoded.size() ==
+        ChatPayloadCodec::HEADER_SIZE + bigId.text.size());
+
     for (std::size_t i = 0; i < 8; ++i)
     {
         assert(encoded[i + 2] == i + 1);
+        assert(encoded[i + 10] == i + 0x11);
     }
 
+    decoded = ChatPayloadCodec::decode(encoded);
+
+    assert(decoded.sessionId == bigId.sessionId);
+    assert(decoded.messageId == bigId.messageId);
+    assert(decoded.text == bigId.text);
+
     std::cout
-        << "[OK] Encodage big-endian sur 8 octets"
+        << "[OK] Encodage big-endian des deux identifiants"
         << std::endl;
 
     // Test 4 : version incorrecte.
@@ -97,7 +112,11 @@ int main()
 
     try
     {
-        ChatPayloadCodec::decode({1, 1, 0});
+        ChatPayloadCodec::decode({
+            ChatPayloadCodec::VERSION,
+            1,
+            0
+        });
     }
     catch (const std::invalid_argument&)
     {
@@ -119,6 +138,7 @@ int main()
         ChatPayloadCodec::encode({
             ChatPayloadKind::PrivateRequest,
             0,
+            1001,
             "Test"
         });
     }

@@ -1,5 +1,6 @@
 
 #include "Message.hpp"
+#include "MessageCodec.hpp"
 
 #include <stdexcept>
 #include <cassert>
@@ -9,14 +10,11 @@
 
 int main()
 {
-    std::vector<std::uint8_t> contenu =
-    {
-        'H', 'e', 'l', 'l', 'o'
-    };
+    std::vector<std::uint8_t> contenu = {'H', 'e', 'l', 'l', 'o' };
 
     Message message(MessageType::Hello, contenu);
 
-    std::vector<std::uint8_t> resultat = message.serialize();
+    std::vector<std::uint8_t> resultat = MessageCodec::serialize(message);
 
     assert(resultat.size() == 10);
 
@@ -34,7 +32,7 @@ int main()
 
     std::cout << "Test Message : OK" << std::endl;
 
-    Message copie = Message::deserialize(resultat);
+    Message copie = MessageCodec::deserialize(resultat);
 
     assert(copie.getType() == MessageType::Hello);
     assert(copie.getPayload() == contenu);
@@ -51,7 +49,7 @@ std::vector<std::uint8_t> paquetInvalide =
 
 try
 {
-    Message::deserialize(paquetInvalide);
+    MessageCodec::deserialize(paquetInvalide);
 }
 catch (const std::length_error& e)
 {

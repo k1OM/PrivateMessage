@@ -248,7 +248,7 @@ if(BUILD_TESTING)
     # ----------------------------------------------
 
     add_executable(test_chat_payload_v2
-        tests/test_chat_payload_v2.cpp
+        tests/unit/test_chat_payload_v2.cpp
     )
 
     target_link_libraries(test_chat_payload_v2
@@ -259,6 +259,70 @@ if(BUILD_TESTING)
     add_test(
         NAME ChatPayloadV2
         COMMAND test_chat_payload_v2
+    )
+
+    # ----------------------------------------------
+    # Tests unitaires : Message
+    # ----------------------------------------------
+
+    add_executable(test_message
+        tests/unit/test_message.cpp
+    )
+
+    target_link_libraries(test_message
+        PRIVATE
+            privatechat_shared
+    )
+
+    target_compile_options(test_message
+        PRIVATE
+            -UNDEBUG
+    )
+
+    add_test(
+        NAME Message
+        COMMAND test_message
+    )
+
+    # ----------------------------------------------
+    # Tests unitaires : MessageCodec
+    # ----------------------------------------------
+
+    add_executable(test_message_codec
+        tests/unit/test_message_codec.cpp
+    )
+
+    target_link_libraries(test_message_codec
+        PRIVATE
+            privatechat_shared
+    )
+
+    add_test(
+        NAME MessageCodec
+        COMMAND test_message_codec
+    )
+
+    # ----------------------------------------------
+    # Tests unitaires : ChatPayloadCodec
+    # ----------------------------------------------
+
+    add_executable(test_chat_payload_codec
+        tests/unit/test_chat_payload_codec.cpp
+    )
+
+    target_link_libraries(test_chat_payload_codec
+        PRIVATE
+            privatechat_shared
+    )
+
+    target_compile_options(test_chat_payload_codec
+        PRIVATE
+            -UNDEBUG
+    )
+
+    add_test(
+        NAME ChatPayloadCodec
+        COMMAND test_chat_payload_codec
     )
 
     # ----------------------------------------------
