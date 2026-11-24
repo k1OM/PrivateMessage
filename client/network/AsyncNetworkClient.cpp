@@ -14,27 +14,22 @@ AsyncNetworkClient::AsyncNetworkClient(
       payload{},
       outgoingMessages{},
       connected(false),
-      stopped(false)
+      stopped(false),
+      connectionState(ConnectionState::Idle)
 {
 }
 
-void AsyncNetworkClient::setOnConnect(
-    ConnectCallback callback
-)
+void AsyncNetworkClient::setOnConnect(ConnectCallback callback)
 {
     onConnect = std::move(callback);
 }
 
-void AsyncNetworkClient::setOnMessage(
-    MessageCallback callback
-)
+void AsyncNetworkClient::setOnMessage(MessageCallback callback)
 {
     onMessage = std::move(callback);
 }
 
-void AsyncNetworkClient::setOnDisconnect(
-    DisconnectCallback callback
-)
+void AsyncNetworkClient::setOnDisconnect(DisconnectCallback callback)
 {
     onDisconnect = std::move(callback);
 }

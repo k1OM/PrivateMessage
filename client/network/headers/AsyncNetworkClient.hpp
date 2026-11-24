@@ -26,18 +26,28 @@ public:
     using DisconnectCallback = std::function<void(const std::string&)>;
 
 private:
+
+    enum class ConnectionState
+    {
+        Idle,
+        Resolving,
+        Connecting,
+        Connected,
+        Stopped
+    };
+
     asio::ip::tcp::resolver resolver;
     asio::ip::tcp::socket socket;
 
     MessageCodec::Header header;
 
     std::vector<std::uint8_t> payload;
-
     std::deque<std::vector<std::uint8_t>> outgoingMessages;
 
     bool connected;
     bool stopped;
 
+    ConnectionState connectionState;
     ConnectCallback onConnect;
     MessageCallback onMessage;
     DisconnectCallback onDisconnect;

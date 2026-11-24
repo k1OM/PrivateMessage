@@ -538,6 +538,43 @@ if(BUILD_TESTING)
         TIMEOUT 10
     )
 
+    # ==================================================    
+    # Test du cycle de vie multithread de ChatController
+    # ==================================================
+    add_executable(test_chat_controller_lifecycle
+        tests/integration/client/test_chat_controller_lifecycle.cpp
 
+        client/controller/ChatController.cpp
+        client/controller/ChatControllerCallbacks.cpp
+        client/controller/ChatControllerMessages.cpp
+
+        client/controller/handlers/ConnectionMessageHandler.cpp
+        client/controller/handlers/PrivateMessageHandler.cpp
+        client/controller/handlers/HeartbeatMessageHandler.cpp
+    )
+
+    target_include_directories(test_chat_controller_lifecycle
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/client/controller/headers
+            ${PROJECT_SOURCE_DIR}/client/controller/events
+            ${PROJECT_SOURCE_DIR}/client/controller/handlers/headers
+            ${PROJECT_SOURCE_DIR}/client/network/headers
+    )
+
+    target_link_libraries(test_chat_controller_lifecycle
+        PRIVATE
+            privatechat_network
+            privatechat_shared
+            Threads::Threads
+    )
+
+    add_test(
+        NAME ChatControllerLifecycle
+        COMMAND test_chat_controller_lifecycle
+    )
+
+    set_tests_properties(ChatControllerLifecycle PROPERTIES
+        TIMEOUT 15
+    )
 
 endif()

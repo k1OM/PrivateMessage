@@ -10,15 +10,14 @@ void AsyncNetworkClient::connect(
     std::uint16_t port
 )
 {
-    if (stopped || socket.is_open())
+    if (connectionState != ConnectionState::Idle)
     {
-        throw std::runtime_error(
-            "Client deja utilise"
-        );
+        throw std::runtime_error("Client deja utilise ou connexion en cours");
     }
 
-    std::shared_ptr<AsyncNetworkClient> self =
-        shared_from_this();
+    std::shared_ptr<AsyncNetworkClient> self = shared_from_this();
+
+    connectionState = ConnectionState::Resolving;
 
     resolver.async_resolve(
         address,
@@ -29,7 +28,7 @@ void AsyncNetworkClient::connect(
             asio::ip::tcp::resolver::results_type endpoints
         )
         {
-            if (self->stopped)
+            if (self->connectionState != ConnectionState::Resolving)
             {
                 return;
             }
@@ -44,6 +43,8 @@ void AsyncNetworkClient::connect(
                 return;
             }
 
+            self->connectionState = ConnectionState::Connecting;
+
             asio::async_connect(
                 self->socket,
                 endpoints,
@@ -53,22 +54,20 @@ void AsyncNetworkClient::connect(
                     const asio::ip::tcp::endpoint&
                 )
                 {
-                    if (self->stopped)
+                    if (self->connectionState != ConnectionState::Connecting)
                     {
                         return;
                     }
 
                     if (error)
                     {
-                        self->closeConnection(
-                            "Connexion impossible : " +
-                            error.message()
-                        );
+                        self->closeConnection("Connexion impossible : " + error.message());
 
                         return;
                     }
 
                     self->connected = true;
+                    self->connectionState = ConnectionState::Connected;
 
                     std::cout
                         << "Connexion asynchrone etablie"
@@ -104,6 +103,8 @@ void AsyncNetworkClient::closeConnection(
 
     stopped = true;
     connected = false;
+
+    connectionState = ConnectionState::Stopped;
 
     asio::error_code error;
 

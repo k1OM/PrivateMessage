@@ -24,8 +24,7 @@ int main()
             )
         );
 
-        const std::uint16_t port =
-            acceptor.local_endpoint().port();
+        const std::uint16_t port = acceptor.local_endpoint().port();
 
         bool connectionEstablished = false;
         bool timedOut = false;
@@ -103,6 +102,34 @@ int main()
             << std::endl;
 
         client->connect("localhost", port);
+
+
+        bool secondConnectionRejected = false;
+
+        try
+        {
+            client->connect("localhost", port);
+        }
+        catch (const std::runtime_error& error)
+        {
+            secondConnectionRejected = true;
+
+            std::cout
+                << "[TEST] Deuxieme connexion refusee : "
+                << error.what()
+                << std::endl;
+        }
+
+        if (!secondConnectionRejected)
+        {
+            std::cerr
+                << "[ECHEC] Double connexion acceptee"
+                << std::endl;
+
+            client->disconnect();
+
+            return 1;
+        }
 
         context.run();
 

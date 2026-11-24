@@ -32,7 +32,7 @@ private:
     std::shared_ptr<AsyncNetworkClient> client;
     std::shared_ptr<AsyncHeartbeatManager> heartbeat;
 
-    std::uint64_t nextMessageId = 1;
+    std::atomic<std::uint64_t> nextMessageId{1};
 
     std::mutex eventMutex;
     std::queue<ChatEvent> events;

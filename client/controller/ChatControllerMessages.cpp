@@ -203,6 +203,16 @@ void ChatController::sendPrivateMessage(
         return;
     }
 
+    if (!started.load() || stopping.load())
+    {
+        pushEvent(
+            ChatEventType::Error,
+            "Connexion indisponible ou en cours d'arret"
+        );
+
+        return;
+    }
+
 
     std::uint64_t messageId = nextMessageId++;
 
@@ -230,7 +240,7 @@ void ChatController::sendPrivateMessage(
 		    {
 		        try
 		        {
-		            if (!client)
+		            if (stopping.load() || !client || !client->isConnected())
 		            {
 		                pushEvent(
 		                    ChatEventType::Error,
