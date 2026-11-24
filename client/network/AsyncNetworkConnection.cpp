@@ -19,6 +19,12 @@ void AsyncNetworkClient::connect(
 
     connectionState = ConnectionState::Resolving;
 
+    startConnectionTimeout(
+        ConnectionState::Resolving,
+        dnsTimeout,
+        "Timeout : resolution DNS"
+    );
+
     resolver.async_resolve(
         address,
         std::to_string(port),
@@ -43,6 +49,7 @@ void AsyncNetworkClient::connect(
                 return;
             }
 
+            self->connectionTimer.cancel();
             self->connectionState = ConnectionState::Connecting;
 
             asio::async_connect(
@@ -66,6 +73,8 @@ void AsyncNetworkClient::connect(
                         return;
                     }
 
+                    self->connectionTimer.cancel();
+
                     self->connected = true;
                     self->connectionState = ConnectionState::Connected;
 
@@ -81,20 +90,57 @@ void AsyncNetworkClient::connect(
                     }
                 }
             );
+
+            self->startConnectionTimeout(
+                ConnectionState::Connecting,
+                self->tcpTimeout,
+                "Timeout : connexion TCP"
+            );
         }
     );
 }
 
+void AsyncNetworkClient::startConnectionTimeout(
+    ConnectionState expectedState,
+    std::chrono::steady_clock::duration duration,
+    const std::string& reason
+)
+{
+    connectionTimer.expires_after(duration);
+
+    std::shared_ptr<AsyncNetworkClient> self =
+        shared_from_this();
+
+    connectionTimer.async_wait(
+        [self, expectedState, reason](
+            const asio::error_code& error
+        )
+        {
+            if (error == asio::error::operation_aborted)
+            {
+                return;
+            }
+
+            if (error)
+            {
+                self->closeConnection(
+                    "Erreur timer : " + error.message()
+                );
+
+                return;
+            }
+
+            self->closeConnection(reason);
+        }
+    );
+}
 
 void AsyncNetworkClient::disconnect()
 {
     closeConnection("Deconnexion demandee");
 }
 
-
-void AsyncNetworkClient::closeConnection(
-    const std::string& reason
-)
+void AsyncNetworkClient::closeConnection(const std::string& reason)
 {
     if (stopped)
     {
@@ -103,15 +149,17 @@ void AsyncNetworkClient::closeConnection(
 
     stopped = true;
     connected = false;
-
     connectionState = ConnectionState::Stopped;
 
     asio::error_code error;
 
-    // Annuler la resolution DNS en cours
+    // Annuler le timeout de connexion
+    connectionTimer.cancel();
+
+    // Annuler la resolution DNS
     resolver.cancel();
 
-    // Annuler les operations reseau
+    // Annuler les operations TCP
     socket.cancel(error);
 
     socket.shutdown(
@@ -121,8 +169,8 @@ void AsyncNetworkClient::closeConnection(
 
     socket.close(error);
 
-    // Ne pas detruire les buffers d'une ecriture
-    // asynchrone encore en attente de son callback.
+    // Conserver les buffers des ecritures
+    // asynchrones jusqu'a leurs callbacks.
 
     std::cout
         << "Connexion fermee : "

@@ -120,4 +120,33 @@ if(PRIVATECHAT_BUILD_CLIENT)
             PRIVATECHAT_SERVER_PORT=${PRIVATECHAT_SERVER_PORT}
     )
 
+
+    # ----------------------------------------------
+    # Test_async_dns_cancel
+    # ----------------------------------------------
+
+    add_executable(test_async_dns_cancel
+        tests/integration/client/test_async_dns_cancel.cpp
+    )
+
+    target_include_directories(test_async_dns_cancel
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/client/network/headers
+    )
+
+    target_link_libraries(test_async_dns_cancel
+        PRIVATE
+            privatechat_network
+            Threads::Threads
+    )
+
+    add_test(
+        NAME AsyncDnsCancellation
+        COMMAND test_async_dns_cancel
+    )
+
+    set_tests_properties(AsyncDnsCancellation PROPERTIES
+        TIMEOUT 10
+    )
+
 endif()

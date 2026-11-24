@@ -538,9 +538,10 @@ if(BUILD_TESTING)
         TIMEOUT 10
     )
 
-    # ==================================================    
+    # ==================================================
     # Test du cycle de vie multithread de ChatController
     # ==================================================
+
     add_executable(test_chat_controller_lifecycle
         tests/integration/client/test_chat_controller_lifecycle.cpp
 
@@ -575,6 +576,35 @@ if(BUILD_TESTING)
 
     set_tests_properties(ChatControllerLifecycle PROPERTIES
         TIMEOUT 15
+    )
+
+
+    # ==================================================
+    # test_async_connection_timeout
+    # ==================================================
+
+    add_executable(test_async_connection_timeout
+        tests/integration/client/test_async_connection_timeout.cpp
+    )
+
+    target_include_directories(test_async_connection_timeout
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/client/network/headers
+    )
+
+    target_link_libraries(test_async_connection_timeout
+        PRIVATE
+            privatechat_network
+            Threads::Threads
+    )
+
+    add_test(
+        NAME AsyncConnectionTimeout
+        COMMAND test_async_connection_timeout
+    )
+
+    set_tests_properties(AsyncConnectionTimeout PROPERTIES
+        TIMEOUT 5
     )
 
 endif()
