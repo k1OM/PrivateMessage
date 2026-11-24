@@ -59,6 +59,8 @@ if(PRIVATECHAT_BUILD_CLIENT)
         client/controller/handlers/ConnectionMessageHandler.cpp
         client/controller/handlers/PrivateMessageHandler.cpp
         client/controller/handlers/HeartbeatMessageHandler.cpp
+
+        client/config/ConfigLoader.cpp
     )
 
     # ----------------------------------------------
@@ -79,6 +81,9 @@ if(PRIVATECHAT_BUILD_CLIENT)
                 ${PROJECT_SOURCE_DIR}/client/controller/headers
                 ${PROJECT_SOURCE_DIR}/client/controller/events
                 ${PROJECT_SOURCE_DIR}/client/controller/handlers/headers
+
+                # Configuration JSON
+                ${PROJECT_SOURCE_DIR}/client/config/headers
         )
 
         target_link_libraries(${TARGET_NAME}

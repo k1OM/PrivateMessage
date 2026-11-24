@@ -21,13 +21,12 @@ class AsyncNetworkClient :
 public:
     using ConnectCallback = std::function<void()>;
 
-    using MessageCallback =
-        std::function<void(const Message&)>;
+    using MessageCallback = std::function<void(const Message&)>;
 
-    using DisconnectCallback =
-        std::function<void(const std::string&)>;
+    using DisconnectCallback = std::function<void(const std::string&)>;
 
 private:
+    asio::ip::tcp::resolver resolver;
     asio::ip::tcp::socket socket;
 
     MessageCodec::Header header;

@@ -447,6 +447,97 @@ if(BUILD_TESTING)
         COMMAND test_session_manager
     )
 
+    # ==================================================
+    # ConnectionConfig - Test unitaire
+    # ==================================================
+
+    add_executable(test_connection_config
+        tests/unit/test_connection_config.cpp
+    )
+
+    target_include_directories(test_connection_config
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/client/config/headers
+    )
+
+    # Conserver les assertions actives en Debug et Release
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(test_connection_config
+            PRIVATE
+                -UNDEBUG
+        )
+    endif()
+
+    add_test(
+        NAME ConnectionConfig
+        COMMAND test_connection_config
+    )
+
+
+
+    # ==================================================
+    # ConfigLoader - Test unitaire
+    # ==================================================
+
+    add_executable(test_config_loader
+        tests/unit/test_config_loader.cpp
+        client/config/ConfigLoader.cpp
+    )
+
+    target_include_directories(test_config_loader
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/client/config/headers
+    )
+
+    target_compile_definitions(test_config_loader
+        PRIVATE
+            PROJECT_SOURCE_DIR_PATH="${PROJECT_SOURCE_DIR}"
+    )
+
+    # Conserver les assertions en Release
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(test_config_loader
+            PRIVATE -UNDEBUG
+        )
+    endif()
+
+    add_test(
+        NAME ConfigLoader
+        COMMAND test_config_loader
+    )
+
+    set_tests_properties(ConfigLoader PROPERTIES
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    )
+
+    # ==================================================
+    # Test de resolution DNS et connexion TCP asynchrone
+    # ==================================================
+
+    add_executable(test_async_dns
+        tests/integration/client/test_async_dns.cpp
+    )
+
+    target_include_directories(test_async_dns
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/client/network/headers
+    )
+
+    target_link_libraries(test_async_dns
+        PRIVATE
+            privatechat_network
+            Threads::Threads
+    )
+
+    add_test(
+        NAME AsyncDnsIntegration
+        COMMAND test_async_dns
+    )
+
+    set_tests_properties(AsyncDnsIntegration PROPERTIES
+        TIMEOUT 10
+    )
+
 
 
 endif()

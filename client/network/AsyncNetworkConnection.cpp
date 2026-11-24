@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <utility>
 
+
 void AsyncNetworkClient::connect(
     const std::string& address,
     std::uint16_t port
@@ -16,17 +17,17 @@ void AsyncNetworkClient::connect(
         );
     }
 
-    asio::ip::tcp::endpoint endpoint(
-        asio::ip::make_address(address),
-        port
-    );
-
     std::shared_ptr<AsyncNetworkClient> self =
         shared_from_this();
 
-    socket.async_connect(
-        endpoint,
-        [self](const asio::error_code& error)
+    resolver.async_resolve(
+        address,
+        std::to_string(port),
+
+        [self](
+            const asio::error_code& error,
+            asio::ip::tcp::resolver::results_type endpoints
+        )
         {
             if (self->stopped)
             {
@@ -36,33 +37,61 @@ void AsyncNetworkClient::connect(
             if (error)
             {
                 self->closeConnection(
-                    "Connexion impossible : " +
+                    "Resolution DNS impossible : " +
                     error.message()
                 );
 
                 return;
             }
 
-            self->connected = true;
+            asio::async_connect(
+                self->socket,
+                endpoints,
 
-            std::cout
-                << "Connexion asynchrone etablie"
-                << std::endl;
+                [self](
+                    const asio::error_code& error,
+                    const asio::ip::tcp::endpoint&
+                )
+                {
+                    if (self->stopped)
+                    {
+                        return;
+                    }
 
-            self->readHeader();
+                    if (error)
+                    {
+                        self->closeConnection(
+                            "Connexion impossible : " +
+                            error.message()
+                        );
 
-            if (self->onConnect)
-            {
-                self->onConnect();
-            }
+                        return;
+                    }
+
+                    self->connected = true;
+
+                    std::cout
+                        << "Connexion asynchrone etablie"
+                        << std::endl;
+
+                    self->readHeader();
+
+                    if (self->onConnect)
+                    {
+                        self->onConnect();
+                    }
+                }
+            );
         }
     );
 }
+
 
 void AsyncNetworkClient::disconnect()
 {
     closeConnection("Deconnexion demandee");
 }
+
 
 void AsyncNetworkClient::closeConnection(
     const std::string& reason
@@ -78,6 +107,10 @@ void AsyncNetworkClient::closeConnection(
 
     asio::error_code error;
 
+    // Annuler la resolution DNS en cours
+    resolver.cancel();
+
+    // Annuler les operations reseau
     socket.cancel(error);
 
     socket.shutdown(

@@ -1,5 +1,5 @@
 #include "MainFrame.hpp"
-#include "ClientConfig.hpp"
+#include "ConfigLoader.hpp"
 
 MainFrame::MainFrame()
     : wxFrame(
@@ -151,12 +151,31 @@ MainFrame::MainFrame()
     UpdateButtons();
 
     AppendLog("Application demarree");
-    AppendLog(
-        "Serveur : " +
-        wxString::FromUTF8(ClientConfig::SERVER_IP) +
-        ":" +
-        wxString::Format("%u", ClientConfig::SERVER_PORT)
-    );
+
+    try
+    {
+        connectionConfig = ConfigLoader::loadFromFile(
+            "config/client.json"
+        );
+
+        AppendLog(
+            "Serveur configure : " +
+            wxString::FromUTF8(connectionConfig.host.c_str()) +
+            ":" +
+            wxString::Format(
+                "%u",
+                static_cast<unsigned int>(connectionConfig.port)
+            )
+        );
+    }
+    catch (const std::exception& error)
+    {
+        AppendLog(
+            "Erreur configuration : " +
+            wxString::FromUTF8(error.what())
+        );
+    }
+
 
     // Interroger le controleur toutes les 100 ms
 

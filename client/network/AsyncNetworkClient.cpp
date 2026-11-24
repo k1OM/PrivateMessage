@@ -8,7 +8,8 @@
 AsyncNetworkClient::AsyncNetworkClient(
     asio::io_context& context
 )
-    : socket(context),
+    : resolver(context),
+      socket(context),
       header{},
       payload{},
       outgoingMessages{},

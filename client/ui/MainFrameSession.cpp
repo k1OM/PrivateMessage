@@ -1,7 +1,5 @@
-
 #include "MainFrame.hpp"
 #include "Protocol.hpp"
-#include "ClientConfig.hpp"
 
 #include <exception>
 #include <memory>
@@ -14,18 +12,29 @@ void MainFrame::OnConnect()
         return;
     }
 
+    if (!connectionConfig.isValid())
+    {
+        AppendLog(
+            "Connexion refusee : configuration invalide"
+        );
+
+        return;
+    }
+
     try
     {
         controller = std::make_unique<ChatController>();
 
         controller->start(
-            ClientConfig::SERVER_IP,
-            ClientConfig::SERVER_PORT
+            connectionConfig.host,
+            connectionConfig.port
         );
 
         sessionActive = true;
 
-        statusPanel->setStatus(ConnectionStatus::Connecting);
+        statusPanel->setStatus(
+            ConnectionStatus::Connecting
+        );
 
         AppendLog("Connexion demandee");
 

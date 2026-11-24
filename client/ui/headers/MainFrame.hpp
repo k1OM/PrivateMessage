@@ -8,6 +8,7 @@
 #include "StatusPanel.hpp"
 #include "LogPanel.hpp"
 #include "ChatPanel.hpp"
+#include "ConnectionConfig.hpp"
 
 #include <wx/wx.h>
 #include <wx/timer.h>
@@ -24,6 +25,7 @@ private:
     ChatPanel* chatPanel = nullptr;
 
     wxTimer eventTimer;
+    ConnectionConfig connectionConfig;
 
     std::unique_ptr<ChatController> controller;
 
