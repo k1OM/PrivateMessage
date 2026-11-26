@@ -25,16 +25,69 @@ find_package(Threads REQUIRED)
 
 include(CTest)
 
+
 # ==================================================
 # Dependances graphiques
 # ==================================================
 
 if(PRIVATECHAT_BUILD_CLIENT)
 
-    find_package(wxWidgets REQUIRED COMPONENTS core base)
-    include(${wxWidgets_USE_FILE})
+    if(MINGW)
+
+        set(PRIVATECHAT_WX_CONFIG
+            "/usr/local/x86_64-w64-mingw32/bin/wx-config"
+            CACHE FILEPATH "wx-config pour Windows"
+        )
+
+        execute_process(
+            COMMAND "${PRIVATECHAT_WX_CONFIG}" --cxxflags
+            OUTPUT_VARIABLE PRIVATECHAT_WX_CXXFLAGS
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            COMMAND_ERROR_IS_FATAL ANY
+        )
+
+        execute_process(
+            COMMAND "${PRIVATECHAT_WX_CONFIG}" --libs core,base
+            OUTPUT_VARIABLE PRIVATECHAT_WX_LIBFLAGS
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            COMMAND_ERROR_IS_FATAL ANY
+        )
+
+        separate_arguments(
+            PRIVATECHAT_WX_CXXFLAGS
+            UNIX_COMMAND
+            "${PRIVATECHAT_WX_CXXFLAGS}"
+        )
+
+        separate_arguments(
+            PRIVATECHAT_WX_LIBFLAGS
+            UNIX_COMMAND
+            "${PRIVATECHAT_WX_LIBFLAGS}"
+        )
+
+        add_library(privatechat_wx INTERFACE)
+
+        target_compile_options(privatechat_wx
+            INTERFACE
+                ${PRIVATECHAT_WX_CXXFLAGS}
+        )
+
+        target_link_libraries(privatechat_wx
+            INTERFACE
+                ${PRIVATECHAT_WX_LIBFLAGS}
+        )
+
+        set(wxWidgets_LIBRARIES privatechat_wx)
+
+    else()
+
+        find_package(wxWidgets REQUIRED COMPONENTS core base)
+        include(${wxWidgets_USE_FILE})
+
+    endif()
 
 endif()
+
 
 # ==================================================
 # Bibliotheque commune (toujours disponible)

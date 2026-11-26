@@ -1,6 +1,12 @@
 # Compilation
 /build*/
 /cmake-build*/
+/build_windows/
+/build_release/
+/build_v14/
+
+# Archives et executables generes
+/dist/
 
 # Fichiers temporaires
 *.o
@@ -14,3 +20,17 @@
 .env.*
 config/client.json
 config/server.json
+
+# Tests experimentaux locaux
+/experiments/
+
+# Executables Windows
+*.exe
+*.dll
+*.pdb
+
+# Cles privees et certificats locaux
+*.pem
+*.key
+*.p12
+*.pfx

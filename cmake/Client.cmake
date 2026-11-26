@@ -20,6 +20,19 @@ if(PRIVATECHAT_BUILD_CLIENT)
         client/network/AsyncHeartbeatProtocol.cpp
     )
 
+    # ----------------------------------------------
+    # Version minimale de Windows pour Asio
+    # ----------------------------------------------
+
+    if(WIN32)
+        add_compile_definitions(
+            UNICODE
+            _UNICODE
+            _WIN32_WINNT=0x0A00
+        )
+    endif()
+
+
     target_include_directories(privatechat_network
         PUBLIC
             ${PROJECT_SOURCE_DIR}/client/network/headers
@@ -69,9 +82,16 @@ if(PRIVATECHAT_BUILD_CLIENT)
 
     function(privatechat_add_client TARGET_NAME)
 
-        add_executable(${TARGET_NAME}
-            ${PRIVATECHAT_CLIENT_SOURCES}
-        )
+        if(WIN32)
+            add_executable(${TARGET_NAME}
+                WIN32
+                ${PRIVATECHAT_CLIENT_SOURCES}
+            )
+        else()
+            add_executable(${TARGET_NAME}
+                ${PRIVATECHAT_CLIENT_SOURCES}
+            )
+        endif()
 
         target_include_directories(${TARGET_NAME}
             PRIVATE
@@ -81,9 +101,8 @@ if(PRIVATECHAT_BUILD_CLIENT)
                 ${PROJECT_SOURCE_DIR}/client/controller/headers
                 ${PROJECT_SOURCE_DIR}/client/controller/events
                 ${PROJECT_SOURCE_DIR}/client/controller/handlers/headers
-
-                # Configuration JSON
                 ${PROJECT_SOURCE_DIR}/client/config/headers
+                ${PROJECT_SOURCE_DIR}/third_party/json/include
         )
 
         target_link_libraries(${TARGET_NAME}
@@ -119,7 +138,6 @@ if(PRIVATECHAT_BUILD_CLIENT)
             PRIVATECHAT_SERVER_IP=\"${PRIVATECHAT_SERVER_IP}\"
             PRIVATECHAT_SERVER_PORT=${PRIVATECHAT_SERVER_PORT}
     )
-
 
     # ----------------------------------------------
     # Test_async_dns_cancel
